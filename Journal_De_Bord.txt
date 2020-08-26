@@ -1,0 +1,143 @@
+Journal De Bord, Projet Cuicui
+
+——————
+16/02/2018
+Mises au point sur le projet et les spécifications.
+Création du diagramme de classe.
+
+Reunion pour nous mettre d'accord sur notre interprétation du sujet et noter nos points d'incompréhension:
+	-Ouverture de plusieurs fichier sur la même fenêtre ou ouverture d'une fenêtre par fichier?
+	-Copier/coller: de buffer à buffer, ou juste sur un buffer?
+
+
+Création d'une première version de l’architecture du programme et d'un diagramme des classes:
+	 ->Un main "cuicui.c"
+	      ->Un module de gestions de fichiers (Ouverture, sauvegarde, lancement des buffers et des interfaces) "gestion.h"
+	      ->Un module de contrôle faisant le lien entre écriture, buffer, gestion de fichier et interface "controleur.h"
+	      ->Un module pour la création et la gestion de l'interface textuelle "interface.h"
+	      ->Un module pour la gestion de l'écriture sur le buffer (écriture, réécriture, supprimer, etc ...) "ecriture.h"
+Cette architecture est sujette à modification.
+
+OBJECTIFS de la semaine:
+	 -Création des fichiers .c .h et écriture des entêtes de fonctions utiles.
+	 -Lecture de doc de ncurses et découverte de la bibliothèque.
+
+
+——————
+23/02/2018
+Se renseigner pour le ‘copier’ (.io, clipboard, etc…)
+Réfléchir à la structure : double pointeurs ou liste doublement chaînée ?
+Options de récupération.
+
+Concernant la mémoire de notre buffer elle sera augmenté au fur et a mesure lors d’une sauvegarde (automatique ou non) sera réajusté au minimum.
+
+Concernant le Buffer
+
+structure : 
+	-liste doublement chainé de char*(plutôt que double pointeur)
+	-nom du fichier 
+	-taille
+	-taille maximum d’une
+
+on peut faire deux structure (comme java cellule et racine) avec une structure ligne (avec un .next) et un structure racine qui garde les information générale (telle que la taille général, le nom du fichier etc…)
+
+
+Quelques fonctions a faire en lecture/ecriture 
+Fonction :
+	-Supprimer un caractère
+	-Ajouter un caractère
+	-Saut de ligne
+	-fonction décalage (qui décale les caractère)
+
+Pour ce qui est de la fonction copier, les element copiés sont dans le ClipBoard : regarder ncurses s’il peut interagir avec les options système IO input output
+
+Pour l’option de récupération, sauvegarder au fur et a mesure dans un fichier « caché » si l’utilisateur sauvegarde ou qu’il quitte normalement l’application, le fichier caché est supprimé. Sinon lorsqu’il ouvre l’application et qu’un de ces fichier « caché » l’application demandera a l’utilisateur s’il veut réouvrir ce fichier.
+
+NB : j’arrive pas a git pull
+
+
+——————
+12/03/2018
+Alerte rouge KEY_BACKSPACE ne fonctionne pas et je n’arrive pas à trouver quelque chose qui m’aiderait sur internet donc si quelqu’un passe par là et a une idée, merci.
+
+
+Pout le scrolling on introduit une variable global int plig qui vas définir a partir de quelle ligne on affiche le contenue du buffer
+
+
+——————
+30/03/2018
+Il faut faire le linewrapping. 
++ gérer le DEL (BACKSPACE) lorsqu’on accède à des interfaces autre que celle de l’éditeur de txt, càd par ex le chargement de fichier.
+
+— - - 
+LINE WRAPPING.
+La ligne dépasse la taille de la fenêtre comment allons nous faire ?
+2 cas de figure se présente a nous, et donc on aura un int lw qui nous servira a dire si on est dans tel ou tel cas 
+
+1er cas (lw): 
+La taille de la fenêtre étant fixée quand une ligne vient à dépasser la taille de la fenêtre la suite est marqué a la ligne suivante. Mais lorsque l’on enregistre le fichier ces ligne seront considérées comme une seule et meme ligne. 
+On va ajouter a la structure de ligne plusieurs element.s Un int vrnum qui donnera le vrais numero de la ligne, et vrcol qui donne combien de ligne précédente ont le meme vrnum.
+
+2em cas (!lw): 
+On peut faire défiler la colonne de gauche a droite grace aux flèches.
+On va donc raisonner de la meme manière que le defilement de haut en bas en ajoutant une variable global pcol qui fonctionnera comme plig.
+
+
+——————
+30/03/2018
+
+Suppr fonctionne sur linux et apple
+Probléme de retour à la ligne précédente en supprimant
+A faire les charactère spéciaux
+Problème de colonne
+Faire les checks
+Voir copier coller
+
+
+——————
+31/03/2018
+Sauvegarde des fichiers est faite mais 2 PB à résoudre :
+*) erreur de segmentation lorsqu’un nouveau fichier et chargé et n’a qu’une ou deux lignes
+*) lors du chargement d’un test qui ne contient qu’une ligne, le curseur se met tout en bas 
+
+
+——————
+6/04/2018
+Problème : erreur de segmentation quand on tente d’ecrire sur une nouvelle ligne (pas quand on viens de la crée et que l’on ait déçus mais quand on est passer a autre chose et que l’on reviens sur cette nouvelle ligne, de même pour la suppression de ces dites lignes.
+
+Ezio : tenter de faire selection (au moins le début)
+
+
+——————
+13/04/2018
+Copier/Coller : fonctionne quand on copie quelque chose d'éxtérieur à ncurse et qu'on utilise maj+ctrl+v sur linux. A voir avec la sélection.
+
+Concernant la section nous allons utilisé la commande F5 par défaut. Quand l’utilisateur tape F5 l’ordinateur sauvegarde la position du curseur. l’utilisateur pourra se déplacer naturellement dans le buffeur cependant si il utilise une fonction d’ecriture ou de suppression ce sera suppression region ou écriture region qui seront utilisé a la place (les position serons le curseur actuel et le bluffeur sauvegarder). 
+Il faudra aussi changer quelque peut la fonctions de déplacé curseur d’interface pour gérer la suppression de tout se qui a été sélectionné : dans quel cas c’est le curseur courant qui est en première argument, ou doit se trouver le curseur courant après la suppression de selection etc… 
+
+
+——————
+25/04/2018
+Réorganisation de gestion (séparateur en commentaire et ordre des fonctions.
+Passage des options dans controleur.
+Modificaiton de la variable global select (probléme avec linux);
+
+Problème au lancement:
+Si je ne met pas un nom de fichier valide, erreur de segmentation.
+
+En linewrapping (lw) il y a quelque problème : 
+*) Des erreur de segmentation survienne : malloc et realloc font défaut.
+*) Lorsque l’on écrit et que la ligne dépasse la taille de la fenêtre, que la nouvelle ligne est crée le dernier caractère de la ligne est « supprimé »
+*) Le nom du fichier apparait de manière aléatoire.
+
+
+——————
+3/05/2018
+Le problème sur les malloc et realloc est plus ou moins résolue j’ai mit la taille des ligne crée a 5 au lieu de 1 ou zero
+ATTENTION : Ezio arrête de croire que la taille c’est strlen alors que c’est l’allocation de mémoire.
+
+
+——————
+17/05/2018
+Tout les petit problème d’erreur de segmentation son régler, comme les problème de linewrapping et de saut de ligne qui pouvais survenir.
+
